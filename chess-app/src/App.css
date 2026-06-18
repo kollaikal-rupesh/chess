@@ -20,12 +20,23 @@ body {
   gap: 24px;
 }
 
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .title {
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   color: #f5f5f5;
   text-transform: uppercase;
+}
+
+.back-btn {
+  font-size: 0.75rem !important;
+  padding: 7px 14px !important;
 }
 
 .players {

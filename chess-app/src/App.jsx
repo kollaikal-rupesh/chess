@@ -4,7 +4,7 @@ import { Chessboard } from 'react-chessboard'
 import { getBestMove } from './chessAI'
 import './App.css'
 
-export default function App() {
+export default function App({ onBack }) {
   const [game, setGame] = useState(new Chess())
   const [moveHistory, setMoveHistory] = useState([])
   const [selectedSquare, setSelectedSquare] = useState(null)
@@ -157,7 +157,12 @@ export default function App() {
 
   return (
     <div className="app">
-      <h1 className="title">Chess</h1>
+      <div className="title-row">
+        {onBack && (
+          <button className="btn back-btn" onClick={onBack}>← MENU</button>
+        )}
+        <h1 className="title">Chess Craft</h1>
+      </div>
       <div className="players">
         <div className={`player ${game.turn() === 'b' && !isOver ? 'active' : ''}`}>
           <span className="piece-icon">♟</span> Black — AI
