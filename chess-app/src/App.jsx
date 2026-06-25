@@ -137,11 +137,26 @@ export default function App({ onBack }) {
     return moved
   }
 
+  function getKingSquare(chess, color) {
+    const board = chess.board()
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const sq = board[r][c]
+        if (sq && sq.type === 'k' && sq.color === color) return sq.square
+      }
+    }
+    return null
+  }
+
   function buildSquareStyles(selected, lm) {
     const styles = {}
     if (lm) {
       styles[lm.from] = { background: 'rgba(255, 206, 68, 0.3)' }
       styles[lm.to] = { background: 'rgba(255, 206, 68, 0.3)' }
+    }
+    if (game.isCheck()) {
+      const kingSq = getKingSquare(game, game.turn())
+      if (kingSq) styles[kingSq] = { background: 'rgba(220, 50, 50, 0.55)' }
     }
     if (selected) {
       Object.assign(styles, getMoveOptions(selected))
