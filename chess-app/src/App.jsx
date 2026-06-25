@@ -15,6 +15,14 @@ function pieceSymbol(type, color) {
   return PIECE_SYMBOLS[color]?.[type] ?? type
 }
 
+const MATERIAL_VALUE = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 }
+
+function materialAdvantage(capturedByWhite, capturedByBlack) {
+  const w = capturedByWhite.reduce((s, p) => s + (MATERIAL_VALUE[p] ?? 0), 0)
+  const b = capturedByBlack.reduce((s, p) => s + (MATERIAL_VALUE[p] ?? 0), 0)
+  return w - b
+}
+
 export default function App({ onBack }) {
   const [game, setGame] = useState(new Chess())
   const [moveHistory, setMoveHistory] = useState([])
@@ -172,6 +180,7 @@ export default function App({ onBack }) {
   }, [lastMove])
 
   const isOver = game.isGameOver()
+  const advantage = materialAdvantage(capturedByWhite, capturedByBlack)
   const movePairs = []
   for (let i = 0; i < moveHistory.length; i += 2) {
     movePairs.push({ white: moveHistory[i], black: moveHistory[i + 1] })
@@ -201,9 +210,11 @@ export default function App({ onBack }) {
         <div className={`player ${game.turn() === 'b' && !isOver ? 'active' : ''}`}>
           <span className="piece-icon">♟</span> Black — AI
           {aiThinking && <span className="thinking-dot"> thinking…</span>}
+          {advantage < 0 && <span className="advantage-badge">+{Math.abs(advantage)}</span>}
         </div>
         <div className={`player ${game.turn() === 'w' && !isOver ? 'active' : ''}`}>
           <span className="piece-icon">♙</span> White — You
+          {advantage > 0 && <span className="advantage-badge">+{advantage}</span>}
         </div>
       </div>
       <div className="layout">

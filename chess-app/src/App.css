@@ -84,6 +84,13 @@ body {
   margin-right: 4px;
 }
 
+.advantage-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #e8d060;
+  margin-left: 6px;
+}
+
 .thinking-dot {
   font-size: 0.78rem;
   color: #c8a060;
