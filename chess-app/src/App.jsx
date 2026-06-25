@@ -6,6 +6,15 @@ import './App.css'
 
 const DIFFICULTY_DEPTH = { easy: 1, medium: 2, hard: 3 }
 
+const PIECE_SYMBOLS = {
+  w: { p: '♙', n: '♘', b: '♗', r: '♖', q: '♕', k: '♔' },
+  b: { p: '♟', n: '♞', b: '♝', r: '♜', q: '♛', k: '♚' },
+}
+
+function pieceSymbol(type, color) {
+  return PIECE_SYMBOLS[color]?.[type] ?? type
+}
+
 export default function App({ onBack }) {
   const [game, setGame] = useState(new Chess())
   const [moveHistory, setMoveHistory] = useState([])
@@ -15,6 +24,8 @@ export default function App({ onBack }) {
   const [status, setStatus] = useState('')
   const [aiThinking, setAiThinking] = useState(false)
   const [difficulty, setDifficulty] = useState('medium')
+  const [capturedByWhite, setCapturedByWhite] = useState([])
+  const [capturedByBlack, setCapturedByBlack] = useState([])
 
   function getStatus(chess) {
     if (chess.isCheckmate()) return `Checkmate! ${chess.turn() === 'w' ? 'Black' : 'White'} wins!`
@@ -44,6 +55,9 @@ export default function App({ onBack }) {
             setGame(next)
             setMoveHistory((prev) => [...prev, result.san])
             setStatus(getStatus(next))
+            if (result.captured) {
+              setCapturedByBlack((prev) => [...prev, result.captured])
+            }
           }
         }
       } catch (e) {
@@ -81,6 +95,9 @@ export default function App({ onBack }) {
     setGame(next)
     setMoveHistory((prev) => [...prev, result.san])
     setStatus(getStatus(next))
+    if (result.captured) {
+      setCapturedByWhite((prev) => [...prev, result.captured])
+    }
     return true
   }
 
@@ -132,6 +149,8 @@ export default function App({ onBack }) {
     setLastMove(null)
     setStatus('')
     setAiThinking(false)
+    setCapturedByWhite([])
+    setCapturedByBlack([])
   }
 
   function undoMove() {
@@ -222,6 +241,22 @@ export default function App({ onBack }) {
         </div>
 
         <div className="sidebar">
+          <div className="captured-row">
+            <span className="captured-label">Captures</span>
+            <span className="captured-pieces">
+              {capturedByWhite.map((p, i) => (
+                <span key={i} className="cap-piece">{pieceSymbol(p, 'b')}</span>
+              ))}
+            </span>
+          </div>
+          <div className="captured-row">
+            <span className="captured-label"></span>
+            <span className="captured-pieces">
+              {capturedByBlack.map((p, i) => (
+                <span key={i} className="cap-piece">{pieceSymbol(p, 'w')}</span>
+              ))}
+            </span>
+          </div>
           <h2>Move History</h2>
           <div className="move-list">
             {movePairs.length === 0 && <p className="no-moves">Make your first move!</p>}

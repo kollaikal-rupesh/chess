@@ -176,6 +176,32 @@ body {
   min-height: 300px;
 }
 
+.captured-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+  padding: 2px 0;
+}
+
+.captured-label {
+  font-size: 0.7rem;
+  color: #5a6a80;
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.captured-pieces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+}
+
+.cap-piece {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
 .sidebar h2 {
   font-size: 0.85rem;
   text-transform: uppercase;
