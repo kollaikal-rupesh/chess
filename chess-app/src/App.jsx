@@ -4,6 +4,8 @@ import { Chessboard } from 'react-chessboard'
 import { getBestMove } from './chessAI'
 import './App.css'
 
+const DIFFICULTY_DEPTH = { easy: 1, medium: 2, hard: 3 }
+
 export default function App({ onBack }) {
   const [game, setGame] = useState(new Chess())
   const [moveHistory, setMoveHistory] = useState([])
@@ -12,6 +14,7 @@ export default function App({ onBack }) {
   const [lastMove, setLastMove] = useState(null)
   const [status, setStatus] = useState('')
   const [aiThinking, setAiThinking] = useState(false)
+  const [difficulty, setDifficulty] = useState('medium')
 
   function getStatus(chess) {
     if (chess.isCheckmate()) return `Checkmate! ${chess.turn() === 'w' ? 'Black' : 'White'} wins!`
@@ -32,7 +35,7 @@ export default function App({ onBack }) {
 
     const timer = setTimeout(() => {
       try {
-        const bestMove = getBestMove(fen, 3)
+        const bestMove = getBestMove(fen, DIFFICULTY_DEPTH[difficulty])
         if (bestMove) {
           const next = new Chess(fen)
           const result = next.move(bestMove)
@@ -162,6 +165,18 @@ export default function App({ onBack }) {
           <button className="btn back-btn" onClick={onBack}>← MENU</button>
         )}
         <h1 className="title">Chess Craft</h1>
+        <div className="difficulty-selector">
+          {['easy', 'medium', 'hard'].map((d) => (
+            <button
+              key={d}
+              className={`btn difficulty-btn${difficulty === d ? ' active' : ''}`}
+              onClick={() => setDifficulty(d)}
+              disabled={aiThinking}
+            >
+              {d.charAt(0).toUpperCase() + d.slice(1)}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="players">
         <div className={`player ${game.turn() === 'b' && !isOver ? 'active' : ''}`}>

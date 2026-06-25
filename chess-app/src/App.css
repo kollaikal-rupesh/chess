@@ -39,6 +39,23 @@ body {
   padding: 7px 14px !important;
 }
 
+.difficulty-selector {
+  display: flex;
+  gap: 6px;
+}
+
+.difficulty-btn {
+  font-size: 0.72rem !important;
+  padding: 5px 12px !important;
+  flex: none;
+}
+
+.difficulty-btn.active {
+  background: #2a5a2a !important;
+  border-color: #4a8a4a !important;
+  color: #90c890 !important;
+}
+
 .players {
   display: flex;
   gap: 24px;
