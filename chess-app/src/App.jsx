@@ -25,15 +25,14 @@ function materialAdvantage(capturedByWhite, capturedByBlack) {
 
 export default function App({ onBack }) {
   const [game, setGame] = useState(new Chess())
-  const [moveHistory, setMoveHistory] = useState([])
+  const [moves, setMoves] = useState([])
   const [selectedSquare, setSelectedSquare] = useState(null)
   const [squareStyles, setSquareStyles] = useState({})
   const [lastMove, setLastMove] = useState(null)
   const [status, setStatus] = useState('')
   const [aiThinking, setAiThinking] = useState(false)
   const [difficulty, setDifficulty] = useState('medium')
-  const [capturedByWhite, setCapturedByWhite] = useState([])
-  const [capturedByBlack, setCapturedByBlack] = useState([])
+  const [boardOrientation, setBoardOrientation] = useState('white')
 
   function getStatus(chess) {
     if (chess.isCheckmate()) return `Checkmate! ${chess.turn() === 'w' ? 'Black' : 'White'} wins!`
@@ -61,18 +60,15 @@ export default function App({ onBack }) {
           if (result) {
             setLastMove({ from: result.from, to: result.to })
             setGame(next)
-            setMoveHistory((prev) => [...prev, result.san])
+            setMoves((prev) => [...prev, result])
             setStatus(getStatus(next))
-            if (result.captured) {
-              setCapturedByBlack((prev) => [...prev, result.captured])
-            }
           }
         }
       } catch (e) {
         console.error('AI error:', e)
       }
       setAiThinking(false)
-    }, 80)
+    }, 200)
 
     return () => clearTimeout(timer)
   }, [game])
@@ -97,15 +93,17 @@ export default function App({ onBack }) {
   function makeHumanMove(from, to) {
     if (game.turn() !== 'w' || game.isGameOver() || aiThinking) return false
     const next = new Chess(game.fen())
-    const result = next.move({ from, to, promotion: 'q' })
+    let result
+    try {
+      result = next.move({ from, to, promotion: 'q' })
+    } catch {
+      return false
+    }
     if (!result) return false
     setLastMove({ from: result.from, to: result.to })
     setGame(next)
-    setMoveHistory((prev) => [...prev, result.san])
+    setMoves((prev) => [...prev, result])
     setStatus(getStatus(next))
-    if (result.captured) {
-      setCapturedByWhite((prev) => [...prev, result.captured])
-    }
     return true
   }
 
@@ -166,23 +164,21 @@ export default function App({ onBack }) {
 
   function resetGame() {
     setGame(new Chess())
-    setMoveHistory([])
+    setMoves([])
     setSelectedSquare(null)
     setSquareStyles({})
     setLastMove(null)
     setStatus('')
     setAiThinking(false)
-    setCapturedByWhite([])
-    setCapturedByBlack([])
   }
 
   function undoMove() {
-    if (moveHistory.length < 2) return
+    if (moves.length < 2) return
     const next = new Chess(game.fen())
     next.undo()
     next.undo()
     setGame(next)
-    setMoveHistory((prev) => prev.slice(0, -2))
+    setMoves((prev) => prev.slice(0, -2))
     setLastMove(null)
     setSquareStyles({})
     setSelectedSquare(null)
@@ -195,10 +191,12 @@ export default function App({ onBack }) {
   }, [lastMove])
 
   const isOver = game.isGameOver()
+  const capturedByWhite = moves.filter((m) => m.color === 'w' && m.captured).map((m) => m.captured)
+  const capturedByBlack = moves.filter((m) => m.color === 'b' && m.captured).map((m) => m.captured)
   const advantage = materialAdvantage(capturedByWhite, capturedByBlack)
   const movePairs = []
-  for (let i = 0; i < moveHistory.length; i += 2) {
-    movePairs.push({ white: moveHistory[i], black: moveHistory[i + 1] })
+  for (let i = 0; i < moves.length; i += 2) {
+    movePairs.push({ white: moves[i].san, black: moves[i + 1]?.san })
   }
 
   return (
@@ -241,6 +239,7 @@ export default function App({ onBack }) {
                 onPieceDrop: handlePieceDrop,
                 onSquareClick: handleSquareClick,
                 squareStyles,
+                boardOrientation,
                 boardStyle: {
                   borderRadius: '6px',
                   boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
@@ -257,8 +256,14 @@ export default function App({ onBack }) {
             {aiThinking ? 'AI is thinking…' : (status || 'Your move — White to start')}
           </div>
           <div className="controls">
-            <button onClick={undoMove} disabled={moveHistory.length < 2 || aiThinking} className="btn">
+            <button onClick={undoMove} disabled={moves.length < 2 || aiThinking} className="btn">
               ← Undo
+            </button>
+            <button
+              onClick={() => setBoardOrientation((o) => o === 'white' ? 'black' : 'white')}
+              className="btn"
+            >
+              ⟳ Flip
             </button>
             <button onClick={resetGame} className="btn btn-primary">
               New Game
